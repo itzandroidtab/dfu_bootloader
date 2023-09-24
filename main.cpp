@@ -96,8 +96,6 @@ static __attribute__((__noreturn__, __naked__)) void start_application() {
 
     // call the user application
     (*reinterpret_cast<void(**)()>((app_vector_address + 0x4)))();
-
-    while (true) {}
 }
 
 int main() {
