@@ -29,7 +29,7 @@ public:
      * @return true 
      * @return false 
      */
-    static bool write(uint32_t offset, uint8_t* data, uint32_t length) {
+    static bool write(const uint32_t offset, const uint8_t* data, const uint32_t length) {
         // get the address we are trying to write
         const uint32_t address = app_vector_address + offset;
 
@@ -48,7 +48,7 @@ public:
         }
 
         // write the data to the flash (always write the full dfu buffer size)
-        return target::io::flash::write(address, data, transfer_size);
+        return target::io::flash::write(address, std::span<const uint8_t>{data, transfer_size});
     }
 
     /**
@@ -85,7 +85,7 @@ using usb_bulk = target::io::usb<target::io::periph::lqfp_80::usb0, klib::usb::d
  */
 static __attribute__((__noreturn__, __naked__)) void start_application() {
     // helper using for moving the vector table
-    using irq = klib::irq_flash<16>;
+    using irq = klib::irq_flash<0, 16>;
 
     // move the vector table to the vector table 
     // of the user
@@ -100,7 +100,7 @@ static __attribute__((__noreturn__, __naked__)) void start_application() {
 
 int main() {
     // get the bootloader pin
-    using bootloader_pin = target::io::pin_in<target::pins::package::lqfp_80::p40>;
+    using bootloader_pin = target::io::pin_in<target::pins::package::lqfp_80::p39>;
 
     // init it as a pin in
     bootloader_pin::init();
