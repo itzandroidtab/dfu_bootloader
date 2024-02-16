@@ -33,10 +33,12 @@ public:
         // get the address we are trying to write
         const uint32_t address = app_vector_address + offset;
 
+        // get the target sector
+        const uint32_t sector = target::io::flash::address_to_sector(address);
+
         // check if we are at the start of the sector
         const bool start_sector = (
-            target::io::flash::address_to_sector(address) == 
-            target::io::flash::address_to_sector(address + (0x1000 - 1))
+            target::io::flash::sector_to_address(sector) == address
         );
 
         // check if we should erase the currect sector by 
