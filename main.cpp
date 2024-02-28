@@ -74,7 +74,7 @@ public:
 };
 
 // using for the usb driver
-using usb_bulk = target::io::usb<target::io::periph::lqfp_80::usb0, klib::usb::device::dfu<dfu, transfer_size>>;
+using usb_dfu = target::io::usb<target::io::periph::lqfp_80::usb0, klib::usb::device::dfu<dfu, transfer_size>>;
 
 /**
  * @brief Helper function that moves the vector table and 
@@ -120,25 +120,31 @@ int main() {
         // else by then
     }
 
-    // setup the flash wait state to 4 + 1 CPU clocks
-    target::io::system::flash::setup<4>();
-
-    // using for setting up the main clock
-    using clock = target::io::system::clock;
-
-    // setup the clock to 96Mhz from the 12mhz oscillator 
-    // to speed up the dfu flash programming
-    // (((15 + 1) * 2 * 12Mhz) / (0 + 1) = 384Mhz) / (3 + 1) = 96Mhz
-    clock::set_main<clock::source::main, 96'000'000, 15, 0, 3>();
-
-    // setup the vector table for the usb interrupts
-    target::irq::init();
-
-    // bootloader mode. configure the usb pll
-    target::io::system::clock::set_usb<12'000'000>();
-
+    // Setup the target specific hardware. When 
+    // changing hardware this would have to be
+    // changed (this is done here as startup.cpp
+    // is not compiled in the bootloader)
+    {
+        // setup the flash wait state to 4 + 1 CPU clocks
+        target::io::system::flash::setup<4>();
+    
+        // using for setting up the main clock
+        using clock = target::io::system::clock;
+    
+        // setup the clock to 96Mhz from the 12mhz oscillator 
+        // to speed up the dfu flash programming
+        // (((15 + 1) * 2 * 12Mhz) / (0 + 1) = 384Mhz) / (3 + 1) = 96Mhz
+        clock::set_main<clock::source::main, 96'000'000, 15, 0, 3>();
+    
+        // setup the vector table for the usb interrupts
+        target::irq::init();
+    
+        // bootloader mode. configure the usb pll
+        target::io::system::clock::set_usb<12'000'000>();
+    }
+    
     // init the usb hardware
-    usb_bulk::init<true, true, false>();
+    usb_dfu::init<true, true, false>();
 
     // wait until we are reset in the dfu handler
     while (true) {
